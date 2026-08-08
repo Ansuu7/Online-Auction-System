@@ -5,6 +5,14 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
 }
+$itemsQuery = $pdo->query(
+    "SELECT items.*, users.full_name AS seller_name
+     FROM items
+     JOIN users ON items.seller_id = users.id
+     WHERE items.status = 'active'
+     ORDER BY items.end_time ASC"
+);
+$items = $itemsQuery->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +27,7 @@ if (!isset($_SESSION['user_id'])) {
         <title>AuctionHub | Dashboard</title>
         <meta name="description" content="AuctionHub dashboard for browsing auctions, categories, and featured listings after login.">         
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body class="landing-page dashboard-page" >
     <div class="dashboard-shell"> 
@@ -175,36 +183,22 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="auction-grid">
-                    <article class="auction-card">
-                        <img src="img/iphone_17_pro_max.jpeg" alt="Apple MacBook Pro auction item">
-                        <div class="auction-body">
-                            <h3>Apple MacBook Pro 14"</h3>
-                            <div class="auction-meta"><span>Current Bid</span><strong>$1,680</strong></div>
-                            <div class="auction-meta"><span>Time Remaining</span><strong>02h 14m</strong></div>
-                            <a class="btn btn-primary btn-small" href="#contact">Bid Now</a>
-                        </div>
-                    </article>
-
-                    <article class="auction-card">
-                        <img src="https://placehold.co/640x420/e9f4ff/165dff?text=Toyota+Corolla" alt="Toyota Corolla auction item">
-                        <div class="auction-body">
-                            <h3>Toyota Corolla 2021</h3>
-                            <div class="auction-meta"><span>Current Bid</span><strong>$12,400</strong></div>
-                            <div class="auction-meta"><span>Time Remaining</span><strong>05h 36m</strong></div>
-                            <a class="btn btn-primary btn-small" href="#contact">Bid Now</a>
-                        </div>
-                    </article>
-
-                    <article class="auction-card">
-                        <img src="https://placehold.co/640x420/f2f7ff/165dff?text=Modern+Wall+Art" alt="Modern wall art auction item">
-                        <div class="auction-body">
-                            <h3>Modern Abstract Wall Art</h3>
-                            <div class="auction-meta"><span>Current Bid</span><strong>$320</strong></div>
-                            <div class="auction-meta"><span>Time Remaining</span><strong>01h 48m</strong></div>
-                            <a class="btn btn-primary btn-small" href="#contact">Bid Now</a>
-                        </div>
-                    </article>
+    <?php if (empty($items)): ?>
+        <p>No active auctions right now. Check back soon!</p>
+    <?php else: ?>
+        <?php foreach ($items as $item): ?>
+            <article class="auction-card">
+                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>">
+                <div class="auction-body">
+                    <h3><?php echo e($item['title']); ?></h3>
+                    <div class="auction-meta"><span>Current Bid</span><strong>$<?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
+                    <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
+                    <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
                 </div>
+            </article>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
             </section>
 
             <section class="section section-reveal section-alt" id="why-choose">
