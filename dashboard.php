@@ -191,7 +191,7 @@ $items = $itemsQuery->fetchAll();
                 <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>">
                 <div class="auction-body">
                     <h3><?php echo e($item['title']); ?></h3>
-                    <div class="auction-meta"><span>Current Bid</span><strong>$<?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
+                    <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
                     <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
                     <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
                 </div>
