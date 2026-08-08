@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
 }
+
 $itemsQuery = $pdo->query(
     "SELECT items.*, users.full_name AS seller_name
      FROM items
@@ -18,19 +19,17 @@ $items = $itemsQuery->fetchAll();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AuctionHub | Dashboard</title>
-    <meta name="description" content="AuctionHub dashboard for browsing auctions, categories, and featured listings after login.">
+    <meta name="description" content="AuctionHub dashboard for browsing auctions and featured listings after login.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"> 
-        <title>AuctionHub | Dashboard</title>
-        <meta name="description" content="AuctionHub dashboard for browsing auctions, categories, and featured listings after login.">         
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css?v=2">
 </head>
-<body class="landing-page dashboard-page" >
-    <div class="dashboard-shell"> 
+<body class="landing-page dashboard-page">
+    <div class="dashboard-shell">
         <div class="dashboard-content-wrap">
         <header class="site-header">
             <nav class="navbar" aria-label="Primary navigation">
@@ -48,16 +47,17 @@ $items = $itemsQuery->fetchAll();
                 <div class="nav-panel" id="primaryNav">
                     <div class="nav-links">
                         <a href="#home">Home</a>
-                        <a href="#categories">Categories</a>
+                        <a href="#featured-auctions">Auctions</a>
                         <a href="#how-it-works">How It Works</a>
                         <a href="#about">About</a>
                         <a href="#contact">Contact</a>
                     </div>
 
-                    <div class="nav-actions">
-                        <span class="session-badge subtle"><?php echo e($_SESSION['user_role'] ?? 'Member'); ?></span>
-                        <a class="btn btn-ghost" href="logout.php">Logout</a>
-                    </div>
+                <div class="nav-actions">
+                    <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
+                    <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
+                    <a class="btn btn-ghost" href="logout.php">Logout</a>
+                </div>
                 </div>
             </nav>
         </header>
@@ -69,10 +69,10 @@ $items = $itemsQuery->fetchAll();
                     <h1>Bid. Win. Own.</h1>
                     <p>Discover exciting auctions, place competitive bids, and win amazing products securely online.</p>
 
-                    <div class="hero-actions">
-                        <a class="btn btn-primary" href="#featured-auctions">Start Bidding</a>
-                        <a class="btn btn-ghost" href="#how-it-works">Learn More</a>
-                    </div>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#featured-auctions">Start Bidding</a>
+                    <a class="btn btn-ghost" href="post_item.php">Post an Item</a>
+                </div>
 
                     <div class="hero-stats" aria-label="AuctionHub highlights">
                         <div>
@@ -106,43 +106,28 @@ $items = $itemsQuery->fetchAll();
                 </div>
             </section>
 
-            <section class="section section-reveal" id="categories">
+            <section class="section section-reveal" id="featured-auctions">
                 <div class="section-heading">
-                    <span class="section-kicker">Featured Categories</span>
-                    <h2>Explore the most popular auction categories.</h2>
+                    <span class="section-kicker">Featured Auctions</span>
+                    <h2>Live auction listings from across AuctionHub.</h2>
                 </div>
 
-                <div class="card-grid category-grid">
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-microchip"></i>
-                        <h3>Electronics</h3>
-                        <p>Find phones, laptops, gaming gear, and smart devices at competitive auction prices.</p>
-                    </article>
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-car-side"></i>
-                        <h3>Vehicles</h3>
-                        <p>Bid on cars, motorcycles, and accessories from verified sellers and dealers.</p>
-                    </article>
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-shirt"></i>
-                        <h3>Fashion</h3>
-                        <p>Discover branded apparel, shoes, and accessories for every style and budget.</p>
-                    </article>
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-couch"></i>
-                        <h3>Furniture</h3>
-                        <p>Upgrade your home or workspace with elegant furniture and decor items.</p>
-                    </article>
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-palette"></i>
-                        <h3>Art</h3>
-                        <p>Browse paintings, sculptures, and creative pieces from talented artists.</p>
-                    </article>
-                    <article class="info-card category-card">
-                        <i class="fa-solid fa-gem"></i>
-                        <h3>Collectibles</h3>
-                        <p>Shop rare collectibles, vintage treasures, and limited-edition items.</p>
-                    </article>
+                <div class="auction-grid">
+                    <?php if (empty($items)): ?>
+                        <p>No active auctions right now. Check back soon!</p>
+                    <?php else: ?>
+                        <?php foreach ($items as $item): ?>
+                            <article class="auction-card">
+                                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>">
+                                <div class="auction-body">
+                                    <h3><?php echo e($item['title']); ?></h3>
+                                    <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
+                                    <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
+                                    <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </section>
 
@@ -176,32 +161,7 @@ $items = $itemsQuery->fetchAll();
                 </div>
             </section>
 
-            <section class="section section-reveal" id="featured-auctions">
-                <div class="section-heading">
-                    <span class="section-kicker">Featured Auctions</span>
-                    <h2>Sample auction listings from across AuctionHub.</h2>
-                </div>
-
-                <div class="auction-grid">
-    <?php if (empty($items)): ?>
-        <p>No active auctions right now. Check back soon!</p>
-    <?php else: ?>
-        <?php foreach ($items as $item): ?>
-            <article class="auction-card">
-                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>">
-                <div class="auction-body">
-                    <h3><?php echo e($item['title']); ?></h3>
-                    <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
-                    <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
-                    <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
-                </div>
-            </article>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</div>
-            </section>
-
-            <section class="section section-reveal section-alt" id="why-choose">
+            <section class="section section-reveal" id="why-choose">
                 <div class="section-heading">
                     <span class="section-kicker">Why Choose AuctionHub</span>
                     <h2>A secure and reliable platform built for confident bidding.</h2>
@@ -231,7 +191,7 @@ $items = $itemsQuery->fetchAll();
                 </div>
             </section>
 
-            <section class="section section-reveal" id="about">
+            <section class="section section-reveal section-alt" id="about">
                 <div class="about-layout">
                     <div class="about-copy">
                         <span class="section-kicker">About AuctionHub</span>
@@ -246,66 +206,6 @@ $items = $itemsQuery->fetchAll();
                         <div class="about-item"><i class="fa-solid fa-shield-heart"></i><span>Trust-focused flow</span></div>
                         <div class="about-item"><i class="fa-solid fa-chart-line"></i><span>Built for growth</span></div>
                     </div>
-                </div>
-            </section>
-
-            <section class="section section-reveal section-alt testimonials" id="testimonials">
-                <div class="section-heading">
-                    <span class="section-kicker">Testimonials</span>
-                    <h2>What our users say about AuctionHub.</h2>
-                </div>
-
-                <div class="testimonial-grid">
-                    <article class="testimonial-card">
-                        <div class="testimonial-top">
-                            <img src="https://placehold.co/120x120/dfeeff/165dff?text=AR" alt="Avatar of Ayesha Rahman">
-                            <div>
-                                <h3>Ayesha Rahman</h3>
-                                <div class="stars" aria-label="5 out of 5 stars">
-                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p>“The bidding process feels smooth and trustworthy. I liked how easy it was to browse different categories and place bids quickly.”</p>
-                    </article>
-
-                    <article class="testimonial-card">
-                        <div class="testimonial-top">
-                            <img src="https://placehold.co/120x120/e9f4ff/165dff?text=MK" alt="Avatar of Marcus Kim">
-                            <div>
-                                <h3>Marcus Kim</h3>
-                                <div class="stars" aria-label="5 out of 5 stars">
-                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p>“AuctionHub looks professional and feels responsive on my phone. It’s the kind of project that stands out in a class presentation.”</p>
-                    </article>
-
-                    <article class="testimonial-card">
-                        <div class="testimonial-top">
-                            <img src="https://placehold.co/120x120/f2f7ff/165dff?text=SN" alt="Avatar of Sofia Nguyen">
-                            <div>
-                                <h3>Sofia Nguyen</h3>
-                                <div class="stars" aria-label="5 out of 5 stars">
-                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p>“The interface is clean, modern, and easy to understand. I especially like the category cards and featured auction layout.”</p>
-                    </article>
-                </div>
-            </section>
-
-            <section class="cta-banner section-reveal" id="cta">
-                <div>
-                    <span class="section-kicker">Join Today</span>
-                    <h2>Ready to Join the Auction?</h2>
-                    <p>Create your account to start bidding, save auctions, and track winning items with ease.</p>
-                </div>
-                <div class="cta-actions">
-                    <a class="btn btn-light" href="signup.php">Register Now</a>
-                    <a class="btn btn-ghost btn-ghost-light" href="logout.php">Logout</a>
                 </div>
             </section>
         </main>
@@ -324,9 +224,9 @@ $items = $itemsQuery->fetchAll();
                     <h3>Quick Links</h3>
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
-                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#featured-auctions">Auctions</a></li>
                         <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#about">About</a></li>
                     </ul>
                 </div>
 
@@ -356,8 +256,8 @@ $items = $itemsQuery->fetchAll();
         </footer>
 
         </div> <!-- /.main-content -->
-        
-   </div> <!--/.dashboard-shell -->
+
+    </div> <!--/.dashboard-shell -->
 
     <script src="script.js?v=3"></script>
 </body>
