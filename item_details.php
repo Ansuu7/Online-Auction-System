@@ -27,6 +27,26 @@ if ($item === false) {
     exit;
 }
 
+if ($item['status'] === 'active' && strtotime($item['end_time']) <= time()) {
+    $winnerQuery = $pdo->prepare(
+        'SELECT bidder_id FROM bids WHERE item_id = :item_id ORDER BY bid_amount DESC LIMIT 1'
+    );
+    $winnerQuery->execute([':item_id' => $itemId]);
+    $winner = $winnerQuery->fetch();
+
+    $winnerId = $winner !== false ? $winner['bidder_id'] : null;
+
+    $closeItem = $pdo->prepare('UPDATE items SET status = :status, winner_id = :winner_id WHERE id = :id');
+    $closeItem->execute([
+        ':status' => 'closed',
+        ':winner_id' => $winnerId,
+        ':id' => $itemId,
+    ]);
+
+    $item['status'] = 'closed';
+    $item['winner_id'] = $winnerId;
+}
+
 $bidsQuery = $pdo->prepare(
     "SELECT bids.*, users.full_name AS bidder_name
      FROM bids
@@ -38,6 +58,7 @@ $bidsQuery->execute([':item_id' => $itemId]);
 $bids = $bidsQuery->fetchAll();
 
 $errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bidAmount = (string) ($_POST['bid_amount'] ?? '');
     $minValidBid = (float) $item['current_price'] + (float) $item['min_increment'];
@@ -108,15 +129,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="message error"><?php echo e($errorMessage); ?></div>
             <?php endif; ?>
 
-            <form method="post" action="item_details.php?id=<?php echo (int) $item['id']; ?>">
-                <div class="form-group">
-                    <label for="bid_amount">Your Bid (minimum: Rs. <?php echo number_format((float) $item['current_price'] + (float) $item['min_increment'], 2); ?>)</label>
-                    <div class="input-wrap">
-                        <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
+            <?php if ($item['status'] === 'active'): ?>
+                <form method="post" action="item_details.php?id=<?php echo (int) $item['id']; ?>">
+                    <div class="form-group">
+                        <label for="bid_amount">Your Bid (minimum: Rs. <?php echo number_format((float) $item['current_price'] + (float) $item['min_increment'], 2); ?>)</label>
+                        <div class="input-wrap">
+                            <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
+                        </div>
                     </div>
+                    <button type="submit" class="btn-primary">Place Bid</button>
+                </form>
+            <?php else: ?>
+                <div class="message error">
+                    This auction has ended.
+                    <?php if (!empty($item['winner_id'])): ?>
+                        <?php if ((int) $item['winner_id'] === (int) $_SESSION['user_id']): ?>
+                            You won this auction!
+                        <?php else: ?>
+                            Winning bidder: Rs. <?php echo number_format((float) $item['current_price'], 2); ?>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        No bids were placed.
+                    <?php endif; ?>
                 </div>
-                <button type="submit" class="btn-primary">Place Bid</button>
-            </form>
+            <?php endif; ?>
 
             <h2 style="margin-top:28px;">Bid History</h2>
             <?php if (empty($bids)): ?>
@@ -135,30 +171,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
         </section>
     </main>
+
     <script>
-    const endTime = new Date("<?php echo e($item['end_time']); ?>").getTime();
+        const endTime = new Date("<?php echo e($item['end_time']); ?>").getTime();
 
-    function updateCountdown() {
-        const now = new Date().getTime();
-        const distance = endTime - now;
-        const countdownEl = document.getElementById('countdown');
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+            const countdownEl = document.getElementById('countdown');
 
-        if (distance <= 0) {
-            countdownEl.textContent = 'Auction Ended';
-            clearInterval(timerInterval);
-            return;
+            if (distance <= 0) {
+                countdownEl.textContent = 'Auction Ended';
+                clearInterval(timerInterval);
+                return;
+            }
+
+            const hours = Math.floor(distance / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
         }
 
-        const hours = Math.floor(distance / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        countdownEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    updateCountdown();
-    const timerInterval = setInterval(updateCountdown, 1000);
-</script>
-</body>
+        updateCountdown();
+        const timerInterval = setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>
