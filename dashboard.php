@@ -5,7 +5,17 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
 }
-
+$outbidQuery = $pdo->prepare(
+    "SELECT items.id, items.title
+     FROM bids
+     JOIN items ON bids.item_id = items.id
+     WHERE bids.bidder_id = :user_id
+     AND items.status = 'active'
+     AND bids.bid_amount < items.current_price
+     GROUP BY items.id, items.title"
+);
+$outbidQuery->execute([':user_id' => $_SESSION['user_id']]);
+$outbidItems = $outbidQuery->fetchAll();
 $itemsQuery = $pdo->query(
     "SELECT items.*, users.full_name AS seller_name
      FROM items
@@ -54,6 +64,9 @@ $items = $itemsQuery->fetchAll();
                     </div>
 
                 <div class="nav-actions">
+                    <?php if (!empty($_SESSION['is_admin'])): ?>
+                    <a class="btn btn-ghost btn-small" href="admin.php">Admin Panel</a>
+                    <?php endif; ?>
                     <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
                     <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
                     <a class="btn btn-ghost" href="logout.php">Logout</a>
@@ -63,6 +76,14 @@ $items = $itemsQuery->fetchAll();
         </header>
 
         <main id="home">
+                <?php if (!empty($outbidItems)): ?>
+                        <div class="message error" style="margin-bottom:16px;">
+                        You've been outbid on:
+                        <?php foreach ($outbidItems as $index => $outbidItem): ?>
+                        <a href="item_details.php?id=<?php echo (int) $outbidItem['id']; ?>"><?php echo e($outbidItem['title']); ?></a><?php echo $index < count($outbidItems) - 1 ? ', ' : ''; ?>
+                <?php endforeach; ?>
+                        </div>
+                <?php endif; ?>
             <section class="dashboard-hero section-reveal">
                 <div class="hero-content">
                     <span class="section-kicker">Online Auctioning System</span>
@@ -233,9 +254,9 @@ $items = $itemsQuery->fetchAll();
                 <div>
                     <h3>Contact Information</h3>
                     <ul class="footer-contact">
-                        <li><i class="fa-solid fa-location-dot"></i><span>University Project, Web Development Lab</span></li>
-                        <li><i class="fa-solid fa-envelope"></i><span>support@auctionhub.local</span></li>
-                        <li><i class="fa-solid fa-phone"></i><span>+1 (555) 012-3456</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>Auction hub Sanepa, Lalitpur</span></li>
+                        <li><i class="fa-solid fa-envelope"></i><span>auctionhub@gmail.com</span></li>
+                        <li><i class="fa-solid fa-phone"></i><span>97087653452</span></li>
                     </ul>
                 </div>
 

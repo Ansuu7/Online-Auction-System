@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errorMessage = 'Please enter a valid email address.';
     } else {
-        $query = $pdo->prepare('SELECT id, full_name, email, password_hash, role FROM users WHERE email = :email LIMIT 1');
+        $query = $pdo->prepare('SELECT id, full_name, email, password_hash, is_admin FROM users WHERE email = :email LIMIT 1');
         $query->execute([':email' => $email]);
         $user = $query->fetch();
 
@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['full_name'];
             $_SESSION['user_email'] = $user['email'];
+            $_SESSION['is_admin'] = (bool) $user['is_admin'];
             $_SESSION['user_role'] = $user['role'] ?: 'Member';
 
             flash('success', 'Login successful.');

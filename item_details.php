@@ -59,7 +59,26 @@ $bids = $bidsQuery->fetchAll();
 
 $errorMessage = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
+    if ((int) $item['seller_id'] === (int) $_SESSION['user_id']) {
+        $winnerQuery = $pdo->prepare(
+            'SELECT bidder_id FROM bids WHERE item_id = :item_id ORDER BY bid_amount DESC LIMIT 1'
+        );
+        $winnerQuery->execute([':item_id' => $itemId]);
+        $winner = $winnerQuery->fetch();
+        $winnerId = $winner !== false ? $winner['bidder_id'] : null;
+
+        $closeItem = $pdo->prepare('UPDATE items SET status = :status, winner_id = :winner_id WHERE id = :id');
+        $closeItem->execute([
+            ':status' => 'closed',
+            ':winner_id' => $winnerId,
+            ':id' => $itemId,
+        ]);
+
+        header('Location: item_details.php?id=' . $itemId);
+        exit;
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bidAmount = (string) ($_POST['bid_amount'] ?? '');
     $minValidBid = (float) $item['current_price'] + (float) $item['min_increment'];
 
@@ -130,15 +149,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <?php if ($item['status'] === 'active'): ?>
-                <form method="post" action="item_details.php?id=<?php echo (int) $item['id']; ?>">
-                    <div class="form-group">
-                        <label for="bid_amount">Your Bid (minimum: Rs. <?php echo number_format((float) $item['current_price'] + (float) $item['min_increment'], 2); ?>)</label>
-                        <div class="input-wrap">
-                            <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
+                <?php if ((int) $item['seller_id'] === (int) $_SESSION['user_id']): ?>
+                    <form method="post" action="item_details.php?id=<?php echo (int) $item['id']; ?>" style="margin-bottom:16px;">
+                        <input type="hidden" name="end_auction" value="1">
+                        <button type="submit" class="btn-primary" style="background:#b42318;" onclick="return confirm('End this auction now and accept the current highest bid?');">End Auction Now</button>
+                    </form>
+                <?php else: ?>
+                    <form method="post" action="item_details.php?id=<?php echo (int) $item['id']; ?>">
+                        <div class="form-group">
+                            <label for="bid_amount">Your Bid (minimum: Rs. <?php echo number_format((float) $item['current_price'] + (float) $item['min_increment'], 2); ?>)</label>
+                            <div class="input-wrap">
+                                <input type="number" id="bid_amount" name="bid_amount" step="0.01" required>
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" class="btn-primary">Place Bid</button>
-                </form>
+                        <button type="submit" class="btn-primary">Place Bid</button>
+                    </form>
+                <?php endif; ?>
             <?php else: ?>
                 <div class="message error">
                     This auction has ended.
