@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
 }
+
 $outbidQuery = $pdo->prepare(
     "SELECT items.id, items.title
      FROM bids
@@ -16,13 +17,27 @@ $outbidQuery = $pdo->prepare(
 );
 $outbidQuery->execute([':user_id' => $_SESSION['user_id']]);
 $outbidItems = $outbidQuery->fetchAll();
-$itemsQuery = $pdo->query(
-    "SELECT items.*, users.full_name AS seller_name
-     FROM items
-     JOIN users ON items.seller_id = users.id
-     WHERE items.status = 'active'
-     ORDER BY items.end_time ASC"
-);
+
+$search = trim((string) ($_GET['search'] ?? ''));
+
+if ($search !== '') {
+    $itemsQuery = $pdo->prepare(
+        "SELECT items.*, users.full_name AS seller_name
+         FROM items
+         JOIN users ON items.seller_id = users.id
+         WHERE items.status = 'active' AND items.title LIKE :search
+         ORDER BY items.end_time ASC"
+    );
+    $itemsQuery->execute([':search' => '%' . $search . '%']);
+} else {
+    $itemsQuery = $pdo->query(
+        "SELECT items.*, users.full_name AS seller_name
+         FROM items
+         JOIN users ON items.seller_id = users.id
+         WHERE items.status = 'active'
+         ORDER BY items.end_time ASC"
+    );
+}
 $items = $itemsQuery->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -63,37 +78,38 @@ $items = $itemsQuery->fetchAll();
                         <a href="#contact">Contact</a>
                     </div>
 
-                <div class="nav-actions">
-                    <?php if (!empty($_SESSION['is_admin'])): ?>
-                    <a class="btn btn-ghost btn-small" href="admin.php">Admin Panel</a>
-                    <?php endif; ?>
-                    <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
-                    <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
-                    <a class="btn btn-ghost" href="logout.php">Logout</a>
-                </div>
+                    <div class="nav-actions">
+                        <?php if (!empty($_SESSION['is_admin'])): ?>
+                            <a class="btn btn-ghost btn-small" href="admin.php">Admin Panel</a>
+                        <?php endif; ?>
+                        <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
+                        <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
+                        <a class="btn btn-ghost" href="logout.php">Logout</a>
+                    </div>
                 </div>
             </nav>
         </header>
 
         <main id="home">
-                <?php if (!empty($outbidItems)): ?>
-                        <div class="message error" style="margin-bottom:16px;">
-                        You've been outbid on:
-                        <?php foreach ($outbidItems as $index => $outbidItem): ?>
+            <?php if (!empty($outbidItems)): ?>
+                <div class="message error" style="margin-bottom:16px;">
+                    You've been outbid on:
+                    <?php foreach ($outbidItems as $index => $outbidItem): ?>
                         <a href="item_details.php?id=<?php echo (int) $outbidItem['id']; ?>"><?php echo e($outbidItem['title']); ?></a><?php echo $index < count($outbidItems) - 1 ? ', ' : ''; ?>
-                <?php endforeach; ?>
-                        </div>
-                <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <section class="dashboard-hero section-reveal">
                 <div class="hero-content">
                     <span class="section-kicker">Online Auctioning System</span>
                     <h1>Bid. Win. Own.</h1>
                     <p>Discover exciting auctions, place competitive bids, and win amazing products securely online.</p>
 
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="#featured-auctions">Start Bidding</a>
-                    <a class="btn btn-ghost" href="post_item.php">Post an Item</a>
-                </div>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#featured-auctions">Start Bidding</a>
+                        <a class="btn btn-ghost" href="post_item.php">Post an Item</a>
+                    </div>
 
                     <div class="hero-stats" aria-label="AuctionHub highlights">
                         <div>
@@ -133,9 +149,16 @@ $items = $itemsQuery->fetchAll();
                     <h2>Live auction listings from across AuctionHub.</h2>
                 </div>
 
+                <form method="get" action="dashboard.php" style="margin-bottom:20px; max-width:420px;">
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="search" placeholder="Search items..." value="<?php echo e($search); ?>">
+                    </div>
+                </form>
+
                 <div class="auction-grid">
                     <?php if (empty($items)): ?>
-                        <p>No active auctions right now. Check back soon!</p>
+                        <p><?php echo $search !== '' ? 'No items match your search.' : 'No active auctions right now. Check back soon!'; ?></p>
                     <?php else: ?>
                         <?php foreach ($items as $item): ?>
                             <article class="auction-card">
@@ -254,9 +277,9 @@ $items = $itemsQuery->fetchAll();
                 <div>
                     <h3>Contact Information</h3>
                     <ul class="footer-contact">
-                        <li><i class="fa-solid fa-location-dot"></i><span>Auction hub Sanepa, Lalitpur</span></li>
-                        <li><i class="fa-solid fa-envelope"></i><span>auctionhub@gmail.com</span></li>
-                        <li><i class="fa-solid fa-phone"></i><span>97087653452</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>University Project, Web Development Lab</span></li>
+                        <li><i class="fa-solid fa-envelope"></i><span>support@auctionhub.local</span></li>
+                        <li><i class="fa-solid fa-phone"></i><span>+1 (555) 012-3456</span></li>
                     </ul>
                 </div>
 
