@@ -130,7 +130,7 @@ $items = $itemsQuery->fetchAll();
                 <div class="hero-visual" aria-hidden="true">
                     <div class="hero-card floating-card">
                         <div class="live-badge"><i class="fa-solid fa-circle"></i> Live Auction</div>
-                        <img src="https://placehold.co/700x520/eff5ff/165dff?text=AuctionHub+Hero+Image" alt="Auction illustration">
+                        <img src="img/auction_img.jpeg" alt="Auction illustration">
                     </div>
                     <div class="hero-float hero-float-one">
                         <i class="fa-solid fa-bolt"></i>
