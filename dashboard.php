@@ -39,6 +39,9 @@ if ($search !== '') {
     );
 }
 $items = $itemsQuery->fetchAll();
+$wishlistQuery = $pdo->prepare('SELECT item_id FROM wishlist WHERE user_id = :user_id');
+$wishlistQuery->execute([':user_id' => $_SESSION['user_id']]);
+$wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,6 +85,7 @@ $items = $itemsQuery->fetchAll();
                         <?php if (!empty($_SESSION['is_admin'])): ?>
                             <a class="btn btn-ghost btn-small" href="admin.php">Admin Panel</a>
                         <?php endif; ?>
+                        <a class="btn btn-ghost btn-small" href="wishlist.php">My Wishlist</a>
                         <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
                         <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
                         <a class="btn btn-ghost" href="logout.php">Logout</a>
@@ -152,7 +156,7 @@ $items = $itemsQuery->fetchAll();
                 <form method="get" action="dashboard.php" style="margin-bottom:20px; max-width:420px;">
                     <div class="input-wrap">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" name="search" placeholder="Search items..." value="<?php echo e($search); ?>">
+                        <input type="text" name="search" placeholder="Search items..." id="search" value="<?php echo e($search); ?>">
                     </div>
                 </form>
 
@@ -168,6 +172,9 @@ $items = $itemsQuery->fetchAll();
                                     <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
                                     <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
                                     <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
+                                    <button type="button" class="btn-ghost btn-small wishlist-btn" data-item-id="<?php echo (int) $item['id']; ?>" data-wishlisted="<?php echo in_array($item['id'], $wishlistedIds, false) ? '1' : '0'; ?>">
+                                        <?php echo in_array($item['id'], $wishlistedIds, false) ? '♥ Wishlisted' : '♡ Wishlist'; ?>
+                                    </button>
                                 </div>
                             </article>
                         <?php endforeach; ?>
@@ -182,21 +189,27 @@ $items = $itemsQuery->fetchAll();
                 </div>
 
                 <div class="steps-grid">
-                    <article class="step-card">
+                    <a href ="signup.php"> <article class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
                         <h3>Create an Account</h3>
                         <p>Register in seconds to unlock bidding, tracking, and account management features.</p>
-                    </article>
+                        </article>
+                        </a>
+
+                    <a href ="#search">
                     <article class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                         <h3>Browse Auctions</h3>
                         <p>Search by category, price, and time remaining to find items you want most.</p>
                     </article>
+                        </a>
+                    <a href ="#featured-auctions">    
                     <article class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-gavel"></i></div>
                         <h3>Place Your Bid</h3>
                         <p>Submit competitive bids and watch the live auction updates in real time.</p>
-                    </article>
+                        </article>
+                        </a>
                     <article class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
                         <h3>Win &amp; Receive Your Item</h3>
@@ -218,7 +231,7 @@ $items = $itemsQuery->fetchAll();
                         <p>Transactions are protected with trusted payment handling and platform safeguards.</p>
                     </article>
                     <article class="info-card feature-highlight">
-                        <i class="fa-solid fa-badge-check"></i>
+                        <i class="fa-solid fa-circle-check"></i>
                         <h3>Verified Sellers</h3>
                         <p>Buy with confidence from sellers who are reviewed and validated.</p>
                     </article>
@@ -277,9 +290,9 @@ $items = $itemsQuery->fetchAll();
                 <div>
                     <h3>Contact Information</h3>
                     <ul class="footer-contact">
-                        <li><i class="fa-solid fa-location-dot"></i><span>University Project, Web Development Lab</span></li>
-                        <li><i class="fa-solid fa-envelope"></i><span>support@auctionhub.local</span></li>
-                        <li><i class="fa-solid fa-phone"></i><span>+1 (555) 012-3456</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>Sagarmatha College of Science and Technology, Sanepa</span></li>
+                        <li><i class="fa-solid fa-envelope"></i><span>support@auctionhub.com</span></li>
+                        <li><i class="fa-solid fa-phone"></i><span>98765445634</span></li>
                     </ul>
                 </div>
 

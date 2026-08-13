@@ -157,3 +157,33 @@ window.addEventListener('pageshow', () => {
     clearInlineMessage('loginMessage');
     clearInlineMessage('signupMessage');
 });
+
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.wishlist-btn');
+    if (!button) {
+        return;
+    }
+
+    const itemId = button.dataset.itemId;
+    const isLongLabel = button.textContent.includes('Remove') || button.textContent.includes('Add');
+
+    try {
+        const response = await fetch('toggle_wishlist.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `item_id=${encodeURIComponent(itemId)}`,
+        });
+
+        const data = await response.json();
+
+        if (data.wishlisted) {
+            button.textContent = isLongLabel ? '♥ Remove from Wishlist' : '♥ Wishlisted';
+            button.dataset.wishlisted = '1';
+        } else {
+            button.textContent = isLongLabel ? '♡ Add to Wishlist' : '♡ Wishlist';
+            button.dataset.wishlisted = '0';
+        }
+    } catch (error) {
+        console.error('Wishlist toggle failed:', error);
+    }
+});

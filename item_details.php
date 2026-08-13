@@ -56,6 +56,12 @@ $bidsQuery = $pdo->prepare(
 );
 $bidsQuery->execute([':item_id' => $itemId]);
 $bids = $bidsQuery->fetchAll();
+$wishlistCheck = $pdo->prepare('SELECT id FROM wishlist WHERE user_id = :user_id AND item_id = :item_id');
+$wishlistCheck->execute([
+    ':user_id' => $_SESSION['user_id'],
+    ':item_id' => $itemId,
+]);
+$isWishlisted = $wishlistCheck->fetch() !== false;
 
 $errorMessage = '';
 
@@ -143,6 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
                 <span class="detail-label">Time Remaining</span>
                 <strong id="countdown">Calculating...</strong>
             </div>
+               <button type="button" class="btn-ghost wishlist-btn" data-item-id="<?php echo (int) $item['id']; ?>" data-wishlisted="<?php echo $isWishlisted ? '1' : '0'; ?>">
+                    <?php echo $isWishlisted ? '♥ Remove from Wishlist' : '♡ Add to Wishlist'; ?>
+                </button>
 
             <?php if ($errorMessage !== ''): ?>
                 <div class="message error"><?php echo e($errorMessage); ?></div>
