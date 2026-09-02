@@ -231,5 +231,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
         updateCountdown();
         const timerInterval = setInterval(updateCountdown, 1000);
     </script>
+    <script src="script.js"></script>
 </body>
 </html>

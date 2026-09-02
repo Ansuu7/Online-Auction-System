@@ -791,6 +791,18 @@ form {
     font-weight: 700;
     transition: transform var(--motion-fast), box-shadow var(--motion-fast), background var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast);
 }
+.landing-page .btn-outline-primary {
+    background: transparent;
+    color: var(--primary-dark);
+    border: 1.5px solid var(--primary);
+    box-shadow: none;
+}
+
+.landing-page .btn-outline-primary:hover {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 16px 30px rgba(22, 93, 255, 0.22);
+}
 
 .landing-page .btn-primary {
     width: auto;

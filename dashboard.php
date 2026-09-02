@@ -85,8 +85,6 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                         <?php if (!empty($_SESSION['is_admin'])): ?>
                             <a class="btn btn-ghost btn-small" href="admin.php">Admin Panel</a>
                         <?php endif; ?>
-                        <a class="btn btn-ghost btn-small" href="wishlist.php">My Wishlist</a>
-                        <a class="btn btn-primary btn-small" href="post_item.php">Post an Item</a>
                         <span class="session-badge subtle"><?php echo e($_SESSION['user_name'] ?? 'Member'); ?></span>
                         <a class="btn btn-ghost" href="logout.php">Logout</a>
                     </div>
@@ -112,23 +110,12 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
 
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="#featured-auctions">Start Bidding</a>
-                        <a class="btn btn-ghost" href="post_item.php">Post an Item</a>
+                        <a class="btn btn-outline-primary" href="post_item.php">Post an Item</a>
+                        <a class="btn btn-outline-primary" href="wishlist.php">My Wishlist</a>
+                        <a class="btn btn-outline-primary" href="my_wins.php">My Wins</a>
                     </div>
 
-                    <div class="hero-stats" aria-label="AuctionHub highlights">
-                        <div>
-                            <strong>5K+</strong>
-                            <span>Active bidders</span>
-                        </div>
-                        <div>
-                            <strong>1,200+</strong>
-                            <span>Live auctions</span>
-                        </div>
-                        <div>
-                            <strong>99%</strong>
-                            <span>User satisfaction</span>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <div class="hero-visual" aria-hidden="true">
@@ -308,7 +295,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2026 AuctionHub. All rights reserved.</p>
+                <center><p>&copy; 2026 AuctionHub. All rights reserved.</p> </center>
             </div>
         </footer>
 
