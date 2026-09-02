@@ -205,36 +205,6 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                 </div>
             </section>
 
-            <section class="section section-reveal" id="why-choose">
-                <div class="section-heading">
-                    <span class="section-kicker">Why Choose AuctionHub</span>
-                    <h2>A secure and reliable platform built for confident bidding.</h2>
-                </div>
-
-                <div class="card-grid feature-grid-home">
-                    <article class="info-card feature-highlight">
-                        <i class="fa-solid fa-lock"></i>
-                        <h3>Secure Payments</h3>
-                        <p>Transactions are protected with trusted payment handling and platform safeguards.</p>
-                    </article>
-                    <article class="info-card feature-highlight">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <h3>Verified Sellers</h3>
-                        <p>Buy with confidence from sellers who are reviewed and validated.</p>
-                    </article>
-                    <article class="info-card feature-highlight">
-                        <i class="fa-solid fa-tower-broadcast"></i>
-                        <h3>Real-Time Bidding</h3>
-                        <p>Follow live bid updates and react quickly when competition heats up.</p>
-                    </article>
-                    <article class="info-card feature-highlight">
-                        <i class="fa-solid fa-truck-fast"></i>
-                        <h3>Fast Delivery</h3>
-                        <p>Enjoy quick order processing and shipping after a winning bid is confirmed.</p>
-                    </article>
-                </div>
-            </section>
-
             <section class="section section-reveal section-alt" id="about">
                 <div class="about-layout">
                     <div class="about-copy">
@@ -277,7 +247,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                 <div>
                     <h3>Contact Information</h3>
                     <ul class="footer-contact">
-                        <li><i class="fa-solid fa-location-dot"></i><span>Sagarmatha College of Science and Technology, Sanepa</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>SCST, Sanepa</span></li>
                         <li><i class="fa-solid fa-envelope"></i><span>support@auctionhub.com</span></li>
                         <li><i class="fa-solid fa-phone"></i><span>98765445634</span></li>
                     </ul>
