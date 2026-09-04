@@ -6,20 +6,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_paid'])) {
-    $itemId = (int) ($_POST['item_id'] ?? 0);
-
-    $update = $pdo->prepare(
-        "UPDATE items SET payment_status = 'paid' WHERE id = :id AND winner_id = :winner_id"
-    );
-    $update->execute([
-        ':id' => $itemId,
-        ':winner_id' => $_SESSION['user_id'],
-    ]);
-
-    header('Location: my_wins.php');
-    exit;
-}
 
 $winsQuery = $pdo->prepare(
     "SELECT items.*, users.full_name AS seller_name
@@ -47,6 +33,7 @@ foreach ($wonItems as $wonItem) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="auth-page">
+    <?php require __DIR__ . '/partials_header.php'; ?>
     <main class="auth-shell">
         <section class="auth-card auth-card-wide">
             <div class="brand-mark">
@@ -70,11 +57,7 @@ foreach ($wonItems as $wonItem) {
                         <?php if ($wonItem['payment_status'] === 'paid'): ?>
                             <span class="session-badge">Paid</span>
                         <?php else: ?>
-                            <form method="post" action="my_wins.php">
-                                <input type="hidden" name="item_id" value="<?php echo (int) $wonItem['id']; ?>">
-                                <input type="hidden" name="mark_paid" value="1">
-                                <button type="submit" class="btn-primary btn-small">Mark as Paid</button>
-                            </form>
+                            <a class="btn btn-flat btn-small" href="checkout.php?item_id=<?php echo (int) $wonItem['id']; ?>">Checkout</a>
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>

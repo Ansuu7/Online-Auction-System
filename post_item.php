@@ -79,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="auth-page">
+    <?php require __DIR__ . '/partials_header.php'; ?>
     <main class="auth-shell">
         <section class="auth-card auth-card-wide">
             <div class="brand-mark">

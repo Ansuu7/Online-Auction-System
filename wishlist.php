@@ -11,7 +11,7 @@ $itemsQuery = $pdo->prepare(
      FROM wishlist
      JOIN items ON wishlist.item_id = items.id
      JOIN users ON items.seller_id = users.id
-     WHERE wishlist.user_id = :user_id
+     WHERE wishlist.user_id = :user_id AND items.status = 'active'
      ORDER BY wishlist.created_at DESC"
 );
 $itemsQuery->execute([':user_id' => $_SESSION['user_id']]);
@@ -28,6 +28,7 @@ $items = $itemsQuery->fetchAll();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="auth-page">
+    <?php require __DIR__ . '/partials_header.php'; ?>
     <main class="auth-shell">
         <section class="auth-card auth-card-wide">
             <div class="brand-mark">
@@ -42,10 +43,10 @@ $items = $itemsQuery->fetchAll();
                 <p class="auth-copy">You haven't wishlisted any items yet.</p>
             <?php else: ?>
                 <?php foreach ($items as $item): ?>
-                    <div class="detail-card" style="margin-bottom:14px;">
-                        <span class="detail-label"><?php echo e($item['title']); ?> — Rs. <?php echo number_format((float) $item['current_price'], 2); ?></span>
-                        <strong><?php echo e($item['status']); ?></strong>
-                        <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>" style="margin-top:8px;">View Item</a>
+                    <div class="detail-card" style="margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">
+                        <span class="detail-label"><?php echo e($item['title']); ?></span>
+                        <strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?> — <?php echo e($item['status']); ?></strong>
+                        <a class="btn btn-flat btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>" style="align-self:flex-start;">View Item</a>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>

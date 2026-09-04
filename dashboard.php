@@ -113,6 +113,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                         <a class="btn btn-outline-primary" href="post_item.php">Post an Item</a>
                         <a class="btn btn-outline-primary" href="wishlist.php">My Wishlist</a>
                         <a class="btn btn-outline-primary" href="my_wins.php">My Wins</a>
+                        <a class="btn btn-outline-primary" href="my_orders.php">Order History</a>
                     </div>
 
                     
@@ -153,7 +154,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                     <?php else: ?>
                         <?php foreach ($items as $item): ?>
                             <article class="auction-card">
-                                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>">
+                                <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=No+Image';">
                                 <div class="auction-body">
                                     <h3><?php echo e($item['title']); ?></h3>
                                     <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>

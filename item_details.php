@@ -64,6 +64,7 @@ $wishlistCheck->execute([
 $isWishlisted = $wishlistCheck->fetch() !== false;
 
 $errorMessage = '';
+$flashMessage = pull_flash();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
     if ((int) $item['seller_id'] === (int) $_SESSION['user_id']) {
@@ -112,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
             ':id' => $itemId,
         ]);
 
+        flash('success', 'Your bid was placed successfully!');
         header('Location: item_details.php?id=' . $itemId);
         exit;
     }
@@ -128,12 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="auth-page">
+    <?php require __DIR__ . '/partials_header.php'; ?>
     <main class="auth-shell">
         <section class="auth-card auth-card-wide">
-            <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>" style="width:100%; border-radius:16px; margin-bottom:20px; aspect-ratio:16/9; object-fit:cover;">
-
-            <div class="brand-mark">
-                <div>
+           <img src="<?php echo e($item['image']); ?>" alt="<?php echo e($item['title']); ?>" onerror="this.onerror=null;this.src='https://placehold.co/400x300?text=No+Image';" style="width:100%; border-radius:16px; margin-bottom:20px; max-height:500px; object-fit:contain; background:#f2f7ff;">
                     <p class="eyebrow">Seller: <?php echo e($item['seller_name']); ?></p>
                     <h1><?php echo e($item['title']); ?></h1>
                 </div>
@@ -152,7 +152,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
                <button type="button" class="btn-ghost wishlist-btn" data-item-id="<?php echo (int) $item['id']; ?>" data-wishlisted="<?php echo $isWishlisted ? '1' : '0'; ?>">
                     <?php echo $isWishlisted ? '♥ Remove from Wishlist' : '♡ Add to Wishlist'; ?>
                 </button>
-
+                <?php if ($flashMessage !== null): ?>
+                    <div class="message <?php echo e($flashMessage['type']); ?>"><?php echo e($flashMessage['message']); ?></div>
+                <?php endif; ?>
             <?php if ($errorMessage !== ''): ?>
                 <div class="message error"><?php echo e($errorMessage); ?></div>
             <?php endif; ?>
@@ -226,6 +228,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['end_auction'])) {
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             countdownEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+            if (distance < 5 * 60 * 1000) {
+                countdownEl.style.color = '#b42318';
+            } else {
+                countdownEl.style.color = '';
+            }
         }
 
         updateCountdown();
