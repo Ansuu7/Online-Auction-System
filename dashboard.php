@@ -39,6 +39,7 @@ if ($search !== '') {
     );
 }
 $items = $itemsQuery->fetchAll();
+
 $wishlistQuery = $pdo->prepare('SELECT item_id FROM wishlist WHERE user_id = :user_id');
 $wishlistQuery->execute([':user_id' => $_SESSION['user_id']]);
 $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
@@ -115,8 +116,6 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                         <a class="btn btn-outline-primary" href="my_wins.php">My Wins</a>
                         <a class="btn btn-outline-primary" href="my_orders.php">Order History</a>
                     </div>
-
-                    
                 </div>
 
                 <div class="hero-visual" aria-hidden="true">
@@ -144,7 +143,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                 <form method="get" action="dashboard.php" style="margin-bottom:20px; max-width:420px;">
                     <div class="input-wrap">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" name="search" placeholder="Search items..." id="search" value="<?php echo e($search); ?>">
+                        <input type="text" name="search" placeholder="Search items..." value="<?php echo e($search); ?>">
                     </div>
                 </form>
 
@@ -160,9 +159,14 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                                     <div class="auction-meta"><span>Current Bid</span><strong>Rs. <?php echo number_format((float) $item['current_price'], 2); ?></strong></div>
                                     <div class="auction-meta"><span>Seller</span><strong><?php echo e($item['seller_name']); ?></strong></div>
                                     <a class="btn btn-primary btn-small" href="item_details.php?id=<?php echo (int) $item['id']; ?>">View & Bid</a>
-                                    <button type="button" class="btn-ghost btn-small wishlist-btn" data-item-id="<?php echo (int) $item['id']; ?>" data-wishlisted="<?php echo in_array($item['id'], $wishlistedIds, false) ? '1' : '0'; ?>">
-                                        <?php echo in_array($item['id'], $wishlistedIds, false) ? '♥ Wishlisted' : '♡ Wishlist'; ?>
-                                    </button>
+
+                                    <?php if ((int) $item['seller_id'] === (int) $_SESSION['user_id']): ?>
+                                        <span class="session-badge subtle" style="margin-top:8px;">Your Listing</span>
+                                    <?php else: ?>
+                                        <button type="button" class="btn-ghost btn-small wishlist-btn" data-item-id="<?php echo (int) $item['id']; ?>" data-wishlisted="<?php echo in_array($item['id'], $wishlistedIds, false) ? '1' : '0'; ?>">
+                                            <?php echo in_array($item['id'], $wishlistedIds, false) ? '♥ Wishlisted' : '♡ Wishlist'; ?>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </article>
                         <?php endforeach; ?>
@@ -177,32 +181,35 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
                 </div>
 
                 <div class="steps-grid">
-                    <a href ="signup.php"> <article class="step-card">
+                    <article class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
                         <h3>Create an Account</h3>
                         <p>Register in seconds to unlock bidding, tracking, and account management features.</p>
-                        </article>
-                        </a>
+                    </article>
 
-                    <a href ="#search">
-                    <article class="step-card">
-                        <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-                        <h3>Browse Auctions</h3>
-                        <p>Search by category, price, and time remaining to find items you want most.</p>
-                    </article>
-                        </a>
-                    <a href ="#featured-auctions">    
-                    <article class="step-card">
-                        <div class="step-icon"><i class="fa-solid fa-gavel"></i></div>
-                        <h3>Place Your Bid</h3>
-                        <p>Submit competitive bids and watch the live auction updates in real time.</p>
+                    <a href="#featured-auctions">
+                        <article class="step-card">
+                            <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <h3>Browse Auctions</h3>
+                            <p>Search by category, price, and time remaining to find items you want most.</p>
                         </article>
-                        </a>
-                    <article class="step-card">
-                        <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
-                        <h3>Win &amp; Receive Your Item</h3>
-                        <p>Complete payment securely and have your item delivered quickly and safely.</p>
-                    </article>
+                    </a>
+
+                    <a href="#featured-auctions">
+                        <article class="step-card">
+                            <div class="step-icon"><i class="fa-solid fa-gavel"></i></div>
+                            <h3>Place Your Bid</h3>
+                            <p>Submit competitive bids and watch the live auction updates in real time.</p>
+                        </article>
+                    </a>
+
+                    <a href="my_wins.php">
+                        <article class="step-card">
+                            <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
+                            <h3>Win &amp; Receive Your Item</h3>
+                            <p>Complete payment securely and have your item delivered quickly and safely.</p>
+                        </article>
+                    </a>
                 </div>
             </section>
 
@@ -266,7 +273,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
             </div>
 
             <div class="footer-bottom">
-                <center><p>&copy; 2026 AuctionHub. All rights reserved.</p> </center>
+                <p style="text-align:center;">&copy; 2026 AuctionHub. All rights reserved.</p>
             </div>
         </footer>
 
