@@ -6,14 +6,19 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+$flashMessage = pull_flash();
+
 $outbidQuery = $pdo->prepare(
     "SELECT items.id, items.title
-     FROM bids
-     JOIN items ON bids.item_id = items.id
-     WHERE bids.bidder_id = :user_id
-     AND items.status = 'active'
-     AND bids.bid_amount < items.current_price
-     GROUP BY items.id, items.title"
+     FROM items
+     JOIN (
+         SELECT item_id, MAX(bid_amount) AS my_highest_bid
+         FROM bids
+         WHERE bidder_id = :user_id
+         GROUP BY item_id
+     ) AS my_bids ON items.id = my_bids.item_id
+     WHERE items.status = 'active'
+     AND my_bids.my_highest_bid < items.current_price"
 );
 $outbidQuery->execute([':user_id' => $_SESSION['user_id']]);
 $outbidItems = $outbidQuery->fetchAll();
@@ -56,6 +61,7 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css?v=2">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2377/2377930.png">
 </head>
 <body class="landing-page dashboard-page">
     <div class="dashboard-shell">
@@ -94,6 +100,8 @@ $wishlistedIds = array_column($wishlistQuery->fetchAll(), 'item_id');
         </header>
 
         <main id="home">
+            
+
             <?php if (!empty($outbidItems)): ?>
                 <div class="message error" style="margin-bottom:16px;">
                     You've been outbid on:

@@ -34,7 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['force_end_item'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_admin'])) {
     $userId = (int) ($_POST['user_id'] ?? 0);
 
-    if ($userId !== (int) $_SESSION['user_id']) {
+    $targetQuery = $pdo->prepare('SELECT email FROM users WHERE id = :id');
+    $targetQuery->execute([':id' => $userId]);
+    $target = $targetQuery->fetch();
+
+    $isSuperadmin = $target !== false && $target['email'] === 'ansuu1@gmail.com';
+    $isSelf = $userId === (int) $_SESSION['user_id'];
+
+    if (!$isSuperadmin && !$isSelf) {
         $toggle = $pdo->prepare('UPDATE users SET is_admin = NOT is_admin WHERE id = :id');
         $toggle->execute([':id' => $userId]);
     }
@@ -93,6 +100,7 @@ $allOrders = $allOrdersQuery->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2377/2377930.png">
 </head>
 <body class="auth-page">
     <?php require __DIR__ . '/partials_header.php'; ?>
@@ -151,7 +159,9 @@ $allOrders = $allOrdersQuery->fetchAll();
                                 <td><?php echo $u['is_admin'] ? 'Admin' : 'Member'; ?></td>
                                 <td><?php echo e($u['created_at']); ?></td>
                                 <td>
-                                    <?php if ((int) $u['id'] !== (int) $_SESSION['user_id']): ?>
+                                    <?php if ($u['email'] === 'ansuu1@gmail.com'): ?>
+                                        <span class="detail-label">Superadmin</span>
+                                    <?php elseif ((int) $u['id'] !== (int) $_SESSION['user_id']): ?>
                                         <form method="post" action="admin.php">
                                             <input type="hidden" name="user_id" value="<?php echo (int) $u['id']; ?>">
                                             <input type="hidden" name="toggle_admin" value="1">
